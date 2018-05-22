@@ -29,10 +29,16 @@ export default class Events {
       }
     })
 
+    let isStoped = false
+    let stopImmediatePropagation = () => {
+      isStoped = true
+    }
+
     for (let item of items) {
-      if (item.callback(...args) === false) {
+      if (isStoped) {
         break
       }
+      item.callback(...args, stopImmediatePropagation)
     }
   }
 }
