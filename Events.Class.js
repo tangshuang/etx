@@ -15,6 +15,8 @@ export default class Events {
   }
   emit(event, ...args) {
     let items = this.events.filter(item => item.event === event)
+    
+    // decs
     items.sort((a, b) => {
       if (a.priority > b.priority) {
         return -1
@@ -27,7 +29,7 @@ export default class Events {
       }
     })
 
-    for (item of items) {
+    for (let item of items) {
       if (item.callback(...args) === false) {
         break
       }
