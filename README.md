@@ -34,16 +34,18 @@ class MyClass extends Events {
 - callback: function, should be bound function if needed
 - priority: number, the bigger the earlier, default 10
 
-notice the return value of callback function, if you want to stop execute the next callback functions, you can return 'false':
+Notice: the last parameter of callback function will always be `stopImmediatePropagation` which is used to stop execute following callback functions in event's queue.
 
 ```
-.on('the_event', () => {
-  if (this.name === 'dota') {
-    // do something here
-    return false // other callback functions after this in the event queue (priority < 13) will not execute any more
+.on('some_event', (name, age, stopImmediatePropagation) => {
+  if (name === 'dota') {
+    stopImmediatePropagation()
   }
-  return true
 }, 13)
+```
+
+```
+.emit('some_event', name, age)
 ```
 
 ### off(event, callback)
