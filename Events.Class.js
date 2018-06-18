@@ -7,10 +7,10 @@ export default class Events {
   }
   off(event, callback) {
     if (callback === undefined) {
-      this.events = this.events.filter(item => item.event === event)
+      this.events = this.events.filter(item => item.event !== event)
     }
     else {
-      this.events = this.events.filter(item => item.event === event && item.callback === callback)
+      this.events = this.events.filter(item => item.event !== event || (item.event === event && item.callback !== callback))
     }
   }
   emit(event, ...args) {
