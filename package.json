@@ -1,0 +1,24 @@
+{
+  "name": "events-store",
+  "version": "1.0.1",
+  "description": "A JS events manager.",
+  "main": "events-store.js",
+  "scripts": {
+    "build": "babel EventsStore.js -o events-store.js && babel EventsStoreAsyncEmitter.js -o async.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tangshuang/events-store.git"
+  },
+  "author": "tangshuang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tangshuang/events-store/issues"
+  },
+  "homepage": "https://github.com/tangshuang/events-store#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0"
+  }
+}

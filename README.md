@@ -1,32 +1,39 @@
-# Events.Class.js
+# EventsStore
 
-A basic events manager.
+A JS events manager.
+
+## Install
+
+```
+npm install --save events-store
+```
 
 ## Usage
 
 ```
-import Events from './Events.Class.js'
+import EventsStore from 'events-store'
 
-class MyClass extends Events {
+class MyClass {
   constructor() {
+    this.evtsman = new EventsStore()
     this.fn = this.fn.bind(this)
   }
   bind() {
-    this.on('my_event', this.fn)
+    this.evtsman.on('my_event', this.fn)
   }
   remove() {
-    this.off('my_event', this.fn)
+    this.evtsman.off('my_event', this.fn)
   }
   trigger() {
-    this.emit('my_event', 'david', 12)
+    this.evtsman.emit('my_event', 'david', 12)
   }
-  fn(name, age) {
-    console.log(name, age)
+  fn(e, name, age) {
+    console.log(e, name, age)
   }
 }
 ```
 
-## API
+## Methods
 
 ### on(event, callback, priority)
 
@@ -34,24 +41,63 @@ class MyClass extends Events {
 - callback: function, should be bound function if needed
 - priority: number, the bigger the earlier, default 10
 
-Notice: the last parameter of callback function will always be `stopImmediatePropagation` which is used to stop execute following callback functions in event's queue.
 
 ```
-.on('some_event', (name, age, stopImmediatePropagation) => {
+eventsmanager.on('some_event', (e, name, age) => {
   if (name === 'dota') {
-    stopImmediatePropagation()
+    e.stop()
   }
 }, 13)
 ```
 
 ```
-.emit('some_event', name, age)
+eventsmanager.emit('some_event', name, age)
 ```
+
+Callback function parameters:
+
+- e: a object which have some information about current event callback, use e.stop() to stop excuting the leftover callbacks.
+- other parameters which passed by `emit`
 
 ### off(event, callback)
 
-if you do not pass callback, all callbacks of this event will be removed
+if you do not pass callback, all callbacks of this event will be removed.
 
 ### emit(event, ...args)
 
 trigger callback functions of this event by passing parameters.
+
+
+## Extends
+
+```
+import EventsStore from 'events-store/async'
+
+const evtm = new EventsStore()
+
+evtm.on('sync', () => {})
+evtm.on('async', async (e, name, age) => {})
+
+evtm.on('sync')
+evtm.async('async', 'tomy', 10).then(() => {}).catch(() => {})
+```
+
+This is used for async callback pipeline.
+Here, you use `.async` instead of `.emit`, and ALL callbacks should be a async function.
+
+## Emit
+
+The result of `.emit` or `.async` is the return value of last callback.
+However, you can get the result of each callback during the pipeline by `e.pass_args`.
+
+```
+evt.on('data', (e, data) => {
+  console.log(e.pass_args) // [0, 'a'] , which is emit passed arguments
+  return { a: 'ok' }
+})
+evt.on('data', (e, data) => {
+  console.log(e.pass_args) // { a: 'ok' }
+  return 2
+})
+evt.emit('data', 0, 'a')
+```
