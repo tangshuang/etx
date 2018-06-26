@@ -70,6 +70,8 @@ trigger callback functions of this event by passing parameters.
 
 ## Extends
 
+### Async Emitter
+
 ```
 import EventsStore from 'events-store/async'
 
@@ -85,7 +87,27 @@ evtm.async('async', 'tomy', 10).then(() => {}).catch(() => {})
 This is used for async callback pipeline.
 Here, you use `.async` instead of `.emit`, and ALL callbacks should be a async function.
 
-## Emit
+### ES6 Class
+
+```
+import EventsStore from 'events-store/es6'
+
+class MyClass extends EventsStore {
+  constructor(props) {
+    super()
+    this.props = props
+    this.fn = this.fn.bind(this)
+  }
+  bind(event) {
+    this.on(event, this.fn)
+  }
+  fn() {}
+}
+```
+
+Here you can use `extends` keyword.
+
+## Emit Result
 
 The result of `.emit` or `.async` is the return value of last callback.
 However, you can get the result of each callback during the pipeline by `e.pass_args`.
