@@ -1,21 +1,21 @@
 {
-  "name": "events-store",
+  "name": "hello-events",
   "version": "1.1.0",
   "description": "A JS events manager.",
-  "main": "events-store.js",
+  "main": "hello-events.js",
   "scripts": {
-    "build": "babel src/EventsStore.js -o events-store.js && babel src/EventsStoreAsyncEmitter.js -o async.js && babel src/EventsStore.Class.js -o es6.js"
+    "build": "babel src/HelloEvents.js -o hello-events.js && babel src/HelloEventsAsyncEmitter.js -o async.js && babel src/HelloEvents.Class.js -o es6.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tangshuang/events-store.git"
+    "url": "git+https://github.com/tangshuang/hello-events.git"
   },
   "author": "tangshuang",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tangshuang/events-store/issues"
+    "url": "https://github.com/tangshuang/hello-events/issues"
   },
-  "homepage": "https://github.com/tangshuang/events-store#readme",
+  "homepage": "https://github.com/tangshuang/hello-events#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",

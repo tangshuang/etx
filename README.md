@@ -1,21 +1,21 @@
-# EventsStore
+# HelloEvents
 
 A JS events manager.
 
 ## Install
 
 ```
-npm install --save events-store
+npm install --save hello-events
 ```
 
 ## Usage
 
 ```
-import EventsStore from 'events-store'
+import HelloEvents from 'hello-events'
 
 class MyClass {
   constructor() {
-    this.evtsman = new EventsStore()
+    this.evtsman = new HelloEvents()
     this.fn = this.fn.bind(this)
   }
   bind() {
@@ -40,7 +40,6 @@ class MyClass {
 - event: string, event name
 - callback: function, should be bound function if needed
 - priority: number, the bigger the earlier, default 10
-
 
 ```
 eventsmanager.on('some_event', (e, name, age) => {
@@ -73,9 +72,9 @@ trigger callback functions of this event by passing parameters.
 ### Async Emitter
 
 ```
-import EventsStore from 'events-store/async'
+import HelloEvents from 'hello-events/async'
 
-const evtm = new EventsStore()
+const evtm = new HelloEvents()
 
 evtm.on('sync', () => {})
 evtm.on('async', async (e, name, age) => {})
@@ -90,9 +89,9 @@ Here, you use `.async` instead of `.emit`, and ALL callbacks should be a async f
 ### ES6 Class
 
 ```
-import EventsStore from 'events-store/es6'
+import HelloEvents from 'hello-events/es6'
 
-class MyClass extends EventsStore {
+class MyClass extends HelloEvents {
   constructor(props) {
     super()
     this.props = props
