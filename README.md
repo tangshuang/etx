@@ -79,7 +79,7 @@ const evtm = new HelloEvents()
 evtm.on('sync', () => {})
 evtm.on('async', async (e, name, age) => {})
 
-evtm.on('sync')
+evtm.emit('sync')
 evtm.async('async', 'tomy', 10).then(() => {}).catch(() => {})
 ```
 
