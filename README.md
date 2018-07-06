@@ -10,27 +10,51 @@ npm install --save hello-events
 
 ## Usage
 
+ES6: 
+
+```
+import HelloEvents from 'hello-events/src/hello-events'
+```
+
+With pack tools like webpack:
+
 ```
 import HelloEvents from 'hello-events'
+```
 
-class MyClass {
-  constructor() {
-    this.evtsman = new HelloEvents()
-    this.fn = this.fn.bind(this)
-  }
-  bind() {
-    this.evtsman.on('my_event', this.fn)
-  }
-  remove() {
-    this.evtsman.off('my_event', this.fn)
-  }
-  trigger() {
-    this.evtsman.emit('my_event', 'david', 12)
-  }
-  fn(e, name, age) {
-    console.log(e, name, age)
-  }
-}
+CommonJS:
+
+```
+const HelloEvents = require('hello-events')
+```
+
+AMD & CMD:
+
+```
+define(function(require, exports, module) {
+  const HelloEvents = require('./node_modules/hello-events/dist/hello-events.js')
+})
+```
+
+Normal Browsers:
+
+```
+<script src="./node_modules/hello-events/dist/hello-events.js"></script>
+```
+
+```
+window.HelloEvents
+```
+
+To use:
+
+```
+const events = new HelloEvents()
+events.on('my_event', (e, ...args) => {
+  //...
+})
+//...
+events.trigger('my_event', arg1, arg2)
 ```
 
 ## Methods
@@ -42,7 +66,7 @@ class MyClass {
 - priority: number, the bigger the earlier, default 10
 
 ```
-eventsmanager.on('some_event', (e, name, age) => {
+events.on('some_event', (e, name, age) => {
   if (name === 'dota') {
     e.stop()
   }
@@ -50,75 +74,69 @@ eventsmanager.on('some_event', (e, name, age) => {
 ```
 
 ```
-eventsmanager.emit('some_event', name, age)
+events.trigger('some_event', name, age)
 ```
 
 Callback function parameters:
 
 - e: a object which have some information about current event callback, use e.stop() to stop excuting the leftover callbacks.
-- other parameters which passed by `emit`
+- other parameters which passed by `trigger`
+
+### once(event, callback, priority)
+
+The same as `on`, callback will only run once, after it is executed, it will be offed.
 
 ### off(event, callback)
 
 if you do not pass callback, all callbacks of this event will be removed.
 
-### emit(event, ...args)
+### trigger(event, ...args)
 
 trigger callback functions of this event by passing parameters.
 
+### async emit(event, ...args)
 
-## Extends
-
-### Async Emitter
-
-```
-import HelloEvents from 'hello-events/async'
-
-const evtm = new HelloEvents()
-
-evtm.on('sync', () => {})
-evtm.on('async', async (e, name, age) => {})
-
-evtm.emit('sync')
-evtm.async('async', 'tomy', 10).then(() => {}).catch(() => {})
-```
-
-This is used for async callback pipeline.
-Here, you use `.async` instead of `.emit`, and ALL callbacks should be a async function.
-
-### ES6 Class
+The same as `trigger`. It is used to callback async functions at the same time:
 
 ```
-import HelloEvents from 'hello-events/es6'
-
-class MyClass extends HelloEvents {
-  constructor(props) {
-    super()
-    this.props = props
-    this.fn = this.fn.bind(this)
-  }
-  bind(event) {
-    this.on(event, this.fn)
-  }
-  fn() {}
-}
+events.on('evt', async function f1() {})
+events.on('evt', async function f2() {})
+events.on('evt', async function f3() {})
+events.emit('evt').then(() => {
+  // ...
+})
 ```
 
-Here you can use `extends` keyword.
+All the callback functions will be run at the same time. Only after all callbacks resolved, the callback in then will run.
 
-## Emit Result
+### async dispatch(event, ...args)
 
-The result of `.emit` or `.async` is the return value of last callback.
+The same as `trigger`. It is used to callback async functions one by one:
+
+```
+events.on('evt', async function f1() {})
+events.on('evt', async function f2() {})
+events.on('evt', async function f3() {})
+events.dispatch('evt').then(() => {
+  // ...
+})
+```
+
+For this code block, f2 will run after f1 resolved, f3 is the same will run after f2 resolved. If f1 rejected, f2 and f3 will not run any more.
+
+## Trigger Result
+
+The result of `.trigger` or `.async` is the return value of last callback.
 However, you can get the result of each callback during the pipeline by `e.pass_args`.
 
 ```
 evt.on('data', (e, data) => {
-  console.log(e.pass_args) // [0, 'a'] , which is emit passed arguments
+  console.log(e.pass_args) // [0, 'a'] , which is trigger passed arguments
   return { a: 'ok' }
 })
 evt.on('data', (e, data) => {
   console.log(e.pass_args) // { a: 'ok' }
   return 2
 })
-evt.emit('data', 0, 'a')
+let res = evt.trigger('data', 0, 'a') // 2
 ```

@@ -1,4 +1,2 @@
 node_modules/
-/async.js
-/hello-events.js
-/es6.js
+dist/
