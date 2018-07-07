@@ -6,11 +6,11 @@ var namespace = 'HelloEvents'
 gulp.src('src/hello-events.js')
   .pipe(babel({
     presets: [
-      ['env', { targets: { browsers: 'last 1 chrome versions' } }]
+      ['env']
     ],
     plugins: [
       'transform-async-to-promises',
-      'transform-es2015-classes'
+      'transform-es2015-classes',
     ]
   }))
   .pipe(bufferify(function(content) {

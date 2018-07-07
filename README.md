@@ -32,7 +32,7 @@ AMD & CMD:
 
 ```
 define(function(require, exports, module) {
-  const HelloEvents = require('./node_modules/hello-events/dist/hello-events.js')
+  const HelloEvents = require('hello-events')
 })
 ```
 
@@ -88,11 +88,11 @@ The same as `on`, callback will only run once, after it is executed, it will be 
 
 ### off(event, callback)
 
-if you do not pass callback, all callbacks of this event will be removed.
+If you do not pass callback, all callbacks of this event will be removed.
 
 ### trigger(event, ...args)
 
-trigger callback functions of this event by passing parameters.
+Trigger callback functions of this event by passing parameters.
 
 ### async emit(event, ...args)
 
@@ -102,7 +102,7 @@ The same as `trigger`. It is used to callback async functions at the same time:
 events.on('evt', async function f1() {})
 events.on('evt', async function f2() {})
 events.on('evt', async function f3() {})
-events.emit('evt').then(() => {
+events.emit('evt').then(() => { // f1, f2, f3 will run at the same time
   // ...
 })
 ```
@@ -126,7 +126,7 @@ For this code block, f2 will run after f1 resolved, f3 is the same will run afte
 
 ## Trigger Result
 
-The result of `.trigger` or `.async` is the return value of last callback.
+The result of `.trigger` is the return value of last callback.
 However, you can get the result of each callback during the pipeline by `e.pass_args`.
 
 ```
@@ -138,5 +138,5 @@ evt.on('data', (e, data) => {
   console.log(e.pass_args) // { a: 'ok' }
   return 2
 })
-let res = evt.trigger('data', 0, 'a') // 2
+let res = evt.trigger('data', 0, 'a') // res = 2
 ```

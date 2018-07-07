@@ -1,3 +1,17 @@
+function sortItemsByPriorityDESC(items) {
+  items.sort((a, b) => {
+    if (a.priority > b.priority) {
+      return -1
+    }
+    else if (a.priority < b.priority) {
+      return 1
+    }
+    else {
+      return 0
+    }
+  })
+}
+
 export default class HelloEvents {
   constructor() {
     this.events = []
@@ -18,19 +32,7 @@ export default class HelloEvents {
   }
   trigger(event, ...args) {
     let items = this.events.filter(item => item.event === event)
-    
-    // DESC
-    items.sort((a, b) => {
-      if (a.priority > b.priority) {
-        return -1
-      }
-      else if (a.priority < b.priority) {
-        return 1
-      }
-      else {
-        return 0
-      }
-    })
+    sortItemsByPriorityDESC(items)
   
     let isStoped = false
     let stop = () => {
@@ -42,6 +44,7 @@ export default class HelloEvents {
       if (isStoped) {
         break
       }
+
       let item = items[i]
       let e = {
         event_name: item.event,
@@ -49,9 +52,6 @@ export default class HelloEvents {
         callback_index: i,
         callback_length: len,
         stop,
-        stopImmediatePropagation: stop,
-        preventDefault: stop,
-        stopPropagation: stop,
         pass_args: result,
       }
       result = item.callback(e, ...args)
@@ -65,20 +65,11 @@ export default class HelloEvents {
   }
   async emit(event, ...args) {
     let items = this.events.filter(item => item.event === event)
-
-    items.sort((a, b) => {
-      if (a.priority > b.priority) {
-        return -1
-      }
-      else if (a.priority < b.priority) {
-        return 1
-      }
-      else {
-        return 0
-      }
-    })
+    sortItemsByPriorityDESC(items)
   
+    let isStoped = false
     let stop = () => {
+      isStoped = true
       throw new Error()
     }
 
@@ -88,6 +79,7 @@ export default class HelloEvents {
       if (isStoped) {
         break
       }
+      
       let item = items[i]
       let e = {
         event_name: item.event,
@@ -95,9 +87,6 @@ export default class HelloEvents {
         callback_index: i,
         callback_length: len,
         stop,
-        stopImmediatePropagation: stop,
-        preventDefault: stop,
-        stopPropagation: stop,
         pass_args: result.args,
       }
       let defer = item.callback(e, ...args).then((res) => {
@@ -116,23 +105,13 @@ export default class HelloEvents {
   }
   async dispatch(event, ...args) {
     let items = this.events.filter(item => item.event === event)
-    
-    items.sort((a, b) => {
-      if (a.priority > b.priority) {
-        return -1
-      }
-      else if (a.priority < b.priority) {
-        return 1
-      }
-      else {
-        return 0
-      }
-    })
+    sortItemsByPriorityDESC(items)
   
     let i = 0
+    let len = items.length
     let run = async (params) => {
       let item = items[i]
-      if (!item) {
+      if (i === len) {
         return params
       }
   
@@ -145,9 +124,6 @@ export default class HelloEvents {
         callback_index: i,
         callback_length: len,
         stop,
-        stopImmediatePropagation: stop,
-        preventDefault: stop,
-        stopPropagation: stop,
         pass_args: params,
       }
       let result = await item.callback(e, ...args)
@@ -160,7 +136,7 @@ export default class HelloEvents {
   
       return await run(result)
     }
-  
+
     return await run(args)
   }
 }
