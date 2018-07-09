@@ -6,11 +6,10 @@ var namespace = 'HelloEvents'
 gulp.src('src/hello-events.js')
   .pipe(babel({
     presets: [
-      ['env']
+      ["env", { exclude: ["transform-regenerator", "transform-async-to-generator"] }]
     ],
     plugins: [
-      'transform-async-to-promises',
-      'transform-es2015-classes',
+      'async-to-promises',
     ]
   }))
   .pipe(bufferify(function(content) {

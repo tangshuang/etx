@@ -1,6 +1,6 @@
 {
   "name": "hello-events",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "A JS events manager.",
   "main": "hello-events.js",
   "scripts": {
@@ -18,8 +18,7 @@
   "homepage": "https://github.com/tangshuang/hello-events#readme",
   "devDependencies": {
     "babel-core": "^6.26.3",
-    "babel-plugin-transform-async-to-promises": "^0.7.0",
-    "babel-plugin-transform-es2015-classes": "^6.24.1",
+    "babel-plugin-async-to-promises": "^1.0.5",
     "babel-preset-env": "^1.7.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.1",
