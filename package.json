@@ -1,8 +1,8 @@
 {
   "name": "hello-events",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A JS events manager.",
-  "main": "hello-events.js",
+  "main": "dist/hello-events.js",
   "scripts": {
     "build": "node build.js"
   },
