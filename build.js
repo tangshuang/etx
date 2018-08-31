@@ -9,7 +9,7 @@ gulp.src('src/hello-events.js')
       ["env", { exclude: ["transform-regenerator", "transform-async-to-generator"] }]
     ],
     plugins: [
-      'async-to-promises',
+      'transform-async-await',
     ]
   }))
   .pipe(bufferify(function(content) {

@@ -30,7 +30,7 @@ export default class HelloEvents {
       this.events = this.events.filter(item => item.event !== event || (item.event === event && item.callback !== callback))
     }
   }
-  trigger(event, ...args) {
+  emit(event, ...args) {
     let items = this.events.filter(item => item.event === event)
     sortItemsByPriorityDESC(items)
   
@@ -63,7 +63,7 @@ export default class HelloEvents {
   
     return result
   }
-  async emit(event, ...args) {
+  async dispatch(event, ...args) {
     let items = this.events.filter(item => item.event === event)
     sortItemsByPriorityDESC(items)
   
@@ -103,7 +103,7 @@ export default class HelloEvents {
     await Promise.all(promises)
     return result.args
   }
-  async dispatch(event, ...args) {
+  async trigger(event, ...args) {
     let items = this.events.filter(item => item.event === event)
     sortItemsByPriorityDESC(items)
   

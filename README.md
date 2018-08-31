@@ -90,11 +90,11 @@ The same as `on`, callback will only run once, after it is executed, it will be 
 
 If you do not pass callback, all callbacks of this event will be removed.
 
-### trigger(event, ...args)
+### emit(event, ...args)
 
 Trigger callback functions of this event by passing parameters.
 
-### async emit(event, ...args)
+### async dispatch(event, ...args)
 
 The same as `trigger`. It is used to callback async functions at the same time:
 
@@ -109,7 +109,7 @@ events.emit('evt').then(() => { // f1, f2, f3 will run at the same time
 
 All the callback functions will be run at the same time. Only after all callbacks resolved, the callback in then will run.
 
-### async dispatch(event, ...args)
+### async trigger(event, ...args)
 
 The same as `trigger`. It is used to callback async functions one by one:
 
@@ -126,7 +126,7 @@ For this code block, f2 will run after f1 resolved, f3 is the same will run afte
 
 ## Trigger Result
 
-The result of `.trigger` is the return value of last callback.
+The result of `.emit` is the return value of last callback.
 However, you can get the result of each callback during the pipeline by `e.pass_args`.
 
 ```
