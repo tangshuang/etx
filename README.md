@@ -71,13 +71,13 @@ events.on('some_event', (e, name, age) => {
   }
 }, 13)
 
-events.trigger('some_event', name, age)
+events.emit('some_event', name, age)
 ```
 
 Callback function parameters:
 
 - e: a object which have some information about current event callback, use e.stop() to stop excuting the leftover callbacks.
-- other parameters which passed by `trigger`
+- other parameters which passed by `emit`
 
 ### once(event, callback, priority)
 
