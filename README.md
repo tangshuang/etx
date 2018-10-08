@@ -10,7 +10,7 @@ npm install --save hello-events
 
 ## Usage
 
-ES6: 
+ES6:
 
 ```
 import HelloEvents from 'hello-events/src/hello-events'
@@ -40,10 +40,9 @@ Normal Browsers:
 
 ```
 <script src="./node_modules/hello-events/dist/hello-events.js"></script>
-```
-
-```
-window.HelloEvents
+<script>
+const HelloEvents = window.HelloEvents
+</script>
 ```
 
 To use:
@@ -94,49 +93,54 @@ If you do not pass callback, all callbacks of this event will be removed.
 
 Trigger callback functions of this event by passing parameters.
 
-### async dispatch(event, ...args)
+### dispatch(event, ...args)
 
-The same as `trigger`. It is used to callback async functions at the same time:
-
-```
-events.on('evt', async function f1() {})
-events.on('evt', async function f2() {})
-events.on('evt', async function f3() {})
-events.emit('evt').then(() => { // f1, f2, f3 will run at the same time
-  // ...
-})
-```
-
-All the callback functions will be run at the same time. Only after all callbacks resolved, the callback in then will run.
-
-### async trigger(event, ...args)
-
-The same as `trigger`. It is used to callback async functions one by one:
+The same as `emit`. It is used to callback async functions and return a promise:
 
 ```
 events.on('evt', async function f1() {})
 events.on('evt', async function f2() {})
 events.on('evt', async function f3() {})
-events.dispatch('evt').then(() => {
+
+await events.dispatch('evt').then(() => { // f1, f2, f3 will run one by one
   // ...
 })
 ```
 
 For this code block, f2 will run after f1 resolved, f3 is the same will run after f2 resolved. If f1 rejected, f2 and f3 will not run any more.
 
-## Trigger Result
+### confluer(event, ...args)
 
-The result of `.emit` is the return value of last callback.
-However, you can get the result of each callback during the pipeline by `e.pass_args`.
+The same as `dispatch`. It is used to callback async functions and return a promise:
+
+```
+events.on('evt', async function f1() {})
+events.on('evt', async function f2() {})
+events.on('evt', async function f3() {})
+
+await events.confluer('evt').then(() => { // f1, f2, f3 will run at the same time
+  // ...
+})
+```
+
+All the callback functions will be run at the same time. Only after all callbacks resolved, the callback in then will run.
+
+## Passed Arguments
+
+`.confluer` will return a array which contains all results of callbacks.
+
+`.emit` and `.dispatch` will return the value of last callback.
+However, you can get the result of each callback during the pipeline by `e.passed_args`.
 
 ```
 evt.on('data', (e, data) => {
-  console.log(e.pass_args) // [0, 'a'] , which is trigger passed arguments
-  return { a: 'ok' }
-})
-evt.on('data', (e, data) => {
-  console.log(e.pass_args) // { a: 'ok' }
-  return 2
-})
-let res = evt.trigger('data', 0, 'a') // res = 2
+  console.log(e.passed_args) // [0, 'a']     <-------------------------+
+  return { a: 'ok' }     ---------------------------+                  |
+})                                                  |                  |
+evt.on('data', (e, data) => {                       |                  |
+  console.log(e.passed_args) // { a: 'ok' }   <-----+                  |
+  return 2   -----------------------------------------+                |
+})                                                    |                |
+let res = await evt.dispatch('data', 0, 'a')  --------+----------------+
+console.log(res) // 2    <----------------------------+
 ```

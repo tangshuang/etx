@@ -12,6 +12,17 @@ function sortItemsByPriorityDESC(items) {
   })
 }
 
+function convertToAsyncFunction(fn) {
+  return (...args) => {
+    try {
+      return Promise.resolve(fn(...args))
+    }
+    catch(e) {
+      return Promise.reject(e);
+    }
+  }
+}
+
 export default class HelloEvents {
   constructor() {
     this.events = []
@@ -33,12 +44,12 @@ export default class HelloEvents {
   emit(event, ...args) {
     let items = this.events.filter(item => item.event === event)
     sortItemsByPriorityDESC(items)
-  
+
     let isStoped = false
     let stop = () => {
       isStoped = true
     }
-  
+
     let result = args
     for (let i = 0, len = items.length; i < len; i ++) {
       if (isStoped) {
@@ -47,12 +58,13 @@ export default class HelloEvents {
 
       let item = items[i]
       let e = {
-        event_name: item.event,
-        event_priority: item.priority,
+        name: item.event,
+        priority: item.priority,
+        callback: item.callback,
         callback_index: i,
         callback_length: len,
         stop,
-        pass_args: result,
+        passed_args: result,
       }
       result = item.callback(e, ...args)
 
@@ -60,83 +72,91 @@ export default class HelloEvents {
         this.off(item.event, item.callback)
       }
     }
-  
+
     return result
   }
-  async dispatch(event, ...args) {
-    let items = this.events.filter(item => item.event === event)
-    sortItemsByPriorityDESC(items)
-  
-    let isStoped = false
-    let stop = () => {
-      isStoped = true
-      throw new Error()
-    }
+  dispatch(event, ...args) {
+    return new Promise((resolve, reject) => {
+      let items = this.events.filter(item => item.event === event)
+      sortItemsByPriorityDESC(items)
 
-    let promises = []
-    let result = { args }
-    for (let i = 0, len = items.length; i < len; i ++) {
-      if (isStoped) {
-        break
-      }
-      
-      let item = items[i]
-      let e = {
-        event_name: item.event,
-        event_priority: item.priority,
-        callback_index: i,
-        callback_length: len,
-        stop,
-        pass_args: result.args,
-      }
-      let defer = item.callback(e, ...args).then((res) => {
-        e.pass_args = res
-        result.args = res
-      })
-      promises.push(defer)
-
-      if (item.once) {
-        this.off(item.event, item.callback)
-      }
-    }
-  
-    await Promise.all(promises)
-    return result.args
-  }
-  async trigger(event, ...args) {
-    let items = this.events.filter(item => item.event === event)
-    sortItemsByPriorityDESC(items)
-  
-    let i = 0
-    let len = items.length
-    let run = async (params) => {
-      let item = items[i]
-      if (i === len) {
-        return params
-      }
-  
+      let i = 0
+      let len = items.length
+      let isStoped = false
       let stop = () => {
-        throw new Error()
+        isStoped = true
       }
-      let e = {
-        event_name: item.event,
-        event_priority: item.priority,
-        callback_index: i,
-        callback_length: len,
-        stop,
-        pass_args: params,
-      }
-      let result = await item.callback(e, ...args)
 
-      if (item.once) {
-        this.off(item.event, item.callback)
-      }
-  
-      i ++
-  
-      return await run(result)
-    }
+      let through = (params) => {
+        if (isStoped) {
+          reject()
+          return
+        }
 
-    return await run(args)
+        let item = items[i]
+        if (i === len) {
+          resolve(params)
+          return
+        }
+
+        let e = {
+          name: item.event,
+          priority: item.priority,
+          callback: item.callback,
+          callback_index: i,
+          callback_length: len,
+          stop,
+          passed_args: params,
+        }
+        let fn = convertToAsyncFunction(item.callback)
+
+        if (item.once) {
+          this.off(item.event, item.callback)
+        }
+
+        i ++
+        fn(e, ...args).then(through).catch(reject)
+      }
+      through(args)
+    })
+  }
+  confluer(event, ...args) {
+    return new Promise((resolve, reject) => {
+      let items = this.events.filter(item => item.event === event)
+      sortItemsByPriorityDESC(items)
+
+      let isStoped = false
+      let stop = () => {
+        isStoped = true
+      }
+
+      let promises = []
+      for (let i = 0, len = items.length; i < len; i ++) {
+        if (isStoped) {
+          reject()
+          return
+        }
+
+        let item = items[i]
+        let e = {
+          name: item.event,
+          priority: item.priority,
+          callback: item.callback,
+          callback_index: i,
+          callback_length: len,
+          stop,
+          passed_args: args,
+        }
+        let fn = convertToAsyncFunction(item.callback)
+        let defer = fn(e, ...args)
+        promises.push(defer)
+
+        if (item.once) {
+          this.off(item.event, item.callback)
+        }
+      }
+
+      Promise.all(promises).then(resolve).catch(reject)
+    })
   }
 }
