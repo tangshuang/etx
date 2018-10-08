@@ -23,9 +23,16 @@ function convertToAsyncFunction(fn) {
   }
 }
 
+const namespaces = {}
+
 export default class HelloEvents {
-  constructor() {
-    this.events = []
+  constructor(ns) {
+    if (ns) {
+      this.events = namespaces[ns] = namespaces[ns] || []
+    }
+    else {
+      this.events = []
+    }
   }
   on(event, callback, priority = 10) {
     this.events.push({ event, callback, priority })
@@ -34,12 +41,11 @@ export default class HelloEvents {
     this.events.push({ event, callback, priority, once: 1 })
   }
   off(event, callback) {
-    if (callback === undefined) {
-      this.events = this.events.filter(item => item.event !== event)
-    }
-    else {
-      this.events = this.events.filter(item => item.event !== event || (item.event === event && item.callback !== callback))
-    }
+    this.events.forEach((item, i) => {
+      if (item.event === event && (callback === undefined || item.callback === callback)) {
+        this.events.splice(i, 1)
+      }
+    })
   }
   emit(event, ...args) {
     let items = this.events.filter(item => item.event === event)

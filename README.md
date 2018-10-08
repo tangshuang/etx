@@ -12,25 +12,25 @@ npm install --save hello-events
 
 ES6:
 
-```
+```js
 import HelloEvents from 'hello-events/src/hello-events'
 ```
 
 With pack tools like webpack:
 
-```
+```js
 import HelloEvents from 'hello-events'
 ```
 
 CommonJS:
 
-```
+```js
 const HelloEvents = require('hello-events')
 ```
 
 AMD & CMD:
 
-```
+```js
 define(function(require, exports, module) {
   const HelloEvents = require('hello-events')
 })
@@ -38,7 +38,7 @@ define(function(require, exports, module) {
 
 Normal Browsers:
 
-```
+```html
 <script src="./node_modules/hello-events/dist/hello-events.js"></script>
 <script>
 const HelloEvents = window.HelloEvents
@@ -47,13 +47,13 @@ const HelloEvents = window.HelloEvents
 
 To use:
 
-```
+```js
 const events = new HelloEvents()
 events.on('my_event', (e, ...args) => {
   //...
 })
 //...
-events.trigger('my_event', arg1, arg2)
+events.emit('my_event', arg1, arg2)
 ```
 
 ## Methods
@@ -64,15 +64,13 @@ events.trigger('my_event', arg1, arg2)
 - callback: function, should be bound function if needed
 - priority: number, the bigger the earlier, default 10
 
-```
+```js
 events.on('some_event', (e, name, age) => {
   if (name === 'dota') {
     e.stop()
   }
 }, 13)
-```
 
-```
 events.trigger('some_event', name, age)
 ```
 
@@ -89,6 +87,8 @@ The same as `on`, callback will only run once, after it is executed, it will be 
 
 If you do not pass callback, all callbacks of this event will be removed.
 
+Notice: you should must off events' callbacks when you do not need it!!!
+
 ### emit(event, ...args)
 
 Trigger callback functions of this event by passing parameters.
@@ -97,7 +97,7 @@ Trigger callback functions of this event by passing parameters.
 
 The same as `emit`. It is used to callback async functions and return a promise:
 
-```
+```js
 events.on('evt', async function f1() {})
 events.on('evt', async function f2() {})
 events.on('evt', async function f3() {})
@@ -113,7 +113,7 @@ For this code block, f2 will run after f1 resolved, f3 is the same will run afte
 
 The same as `dispatch`. It is used to callback async functions and return a promise:
 
-```
+```js
 events.on('evt', async function f1() {})
 events.on('evt', async function f2() {})
 events.on('evt', async function f3() {})
@@ -132,15 +132,15 @@ All the callback functions will be run at the same time. Only after all callback
 `.emit` and `.dispatch` will return the value of last callback.
 However, you can get the result of each callback during the pipeline by `e.passed_args`.
 
-```
+```js
 evt.on('data', (e, data) => {
-  console.log(e.passed_args) // [0, 'a']     <-------------------------+
-  return { a: 'ok' }     ---------------------------+                  |
-})                                                  |                  |
-evt.on('data', (e, data) => {                       |                  |
-  console.log(e.passed_args) // { a: 'ok' }   <-----+                  |
-  return 2   -----------------------------------------+                |
-})                                                    |                |
-let res = await evt.dispatch('data', 0, 'a')  --------+----------------+
-console.log(res) // 2    <----------------------------+
+  console.log(e.passed_args)  // [0, 'a']      <-------------------------+
+  return { a: 'ok' }          // ---------------------+                  |
+})                            //                      |                  |
+evt.on('data', (e, data) => { //                      |                  |
+  console.log(e.passed_args)  // { a: 'ok' }    <-----+                  |
+  return 2                    // -----------------------+                |
+})                            //                        |                |
+let res = await evt.dispatch('data', 0, 'a')  // -------+----------------+
+console.log(res)              // 2    <-----------------+
 ```
