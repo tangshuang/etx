@@ -125,6 +125,11 @@ await events.confluer('evt').then(() => { // f1, f2, f3 will run at the same tim
 
 All the callback functions will be run at the same time. Only after all callbacks resolved, the callback in then will run.
 
+### destroy()
+
+Destory the instance.
+You should must do this if you use namespace.
+
 ## Passed Arguments
 
 `.confluer` will return a array which contains all results of callbacks.

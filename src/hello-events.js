@@ -165,4 +165,10 @@ export default class HelloEvents {
       Promise.all(promises).then(resolve).catch(reject)
     })
   }
+  destroy() {
+    // remove all events from global namespace
+    // developers should must do this if they use namespace
+    // or they will face memory stack overflow
+    this.events.length = 0
+  }
 }
