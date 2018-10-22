@@ -23,6 +23,16 @@ function convertToAsyncFunction(fn) {
   }
 }
 
+function makeCodeStack() {
+  let e = new Error()
+  let stack = e.stack || e.stacktrace
+  let stacks = stack.split('\n')
+  stacks.shift()
+  stacks.shift()
+  stack = stacks.join('\n')
+  return stack
+}
+
 const namespaces = {}
 
 export default class HelloEvents {
@@ -71,6 +81,7 @@ export default class HelloEvents {
         callback_length: len,
         stop,
         passed_args: result,
+        stack: makeCodeStack(),
       }
       result = item.callback(e, ...args)
 
@@ -113,6 +124,7 @@ export default class HelloEvents {
           callback_length: len,
           stop,
           passed_args: params,
+          stack: makeCodeStack(),
         }
         let fn = convertToAsyncFunction(item.callback)
 
@@ -152,6 +164,7 @@ export default class HelloEvents {
           callback_length: len,
           stop,
           passed_args: args,
+          stack: makeCodeStack(),
         }
         let fn = convertToAsyncFunction(item.callback)
         let defer = fn(e, ...args)
