@@ -88,11 +88,12 @@ export class HelloEvents {
 
       let item = items[i]
       let e = {
-        name: item.event,
+        origin: event,
+        target: item.event,
         priority: item.priority,
         callback: item.callback,
         callback_index: i,
-        callback_length: len,
+        callbacks_length: len,
         stop,
         passed_args: result,
         stack: makeCodeStack(),
@@ -131,11 +132,12 @@ export class HelloEvents {
         }
 
         let e = {
-          name: item.event,
+          origin: event,
+          target: item.event,
           priority: item.priority,
           callback: item.callback,
           callback_index: i,
-          callback_length: len,
+          callbacks_length: len,
           stop,
           passed_args: params,
           stack: makeCodeStack(),
@@ -171,11 +173,12 @@ export class HelloEvents {
 
         let item = items[i]
         let e = {
-          name: item.event,
+          origin: event,
+          target: item.event,
           priority: item.priority,
           callback: item.callback,
           callback_index: i,
-          callback_length: len,
+          callbacks_length: len,
           stop,
           passed_args: args,
           stack: makeCodeStack(),

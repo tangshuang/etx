@@ -73,7 +73,16 @@ events.emit('some_event', name, age)
 
 Callback function parameters:
 
-- e: a object which have some information about current event callback, use e.stop() to stop excuting the leftover callbacks.
+- e: a object which have some information about current event
+  - origin: event name which passed by `emit`,
+  - target: event name which passed by `on`,
+  - priority: event priority,
+  - callback: event callback,
+  - callback_index: event callback index in callbacks,
+  - callbacks_length: callbacks length,
+  - stop: function, to stop run other event callbacks,
+  - passed_args: args from prev callback,
+  - stack: code stack, you can use it for debug,
 - other parameters which passed by `emit`
 
 **event name rules**
