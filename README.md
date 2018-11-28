@@ -13,27 +13,24 @@ npm install --save hello-events
 ES6:
 
 ```js
-import HelloEvents from 'hello-events/src/hello-events'
-```
-
-With pack tools like webpack:
-
-```js
 import HelloEvents from 'hello-events'
 ```
 
 CommonJS:
 
 ```js
-const HelloEvents = require('hello-events')
+const { HelloEvents } = require('hello-events')
 ```
 
-AMD & CMD:
+AMD:
 
-```js
+```html
+<script src="./node_modules/hello-events/dist/hello-events.js"></script>
+<script>
 define(function(require, exports, module) {
-  const HelloEvents = require('hello-events')
+  const { HelloEvents } = require('hello-events')
 })
+</script>
 ```
 
 Normal Browsers:
@@ -41,7 +38,7 @@ Normal Browsers:
 ```html
 <script src="./node_modules/hello-events/dist/hello-events.js"></script>
 <script>
-const HelloEvents = window.HelloEvents
+const { HelloEvents } = window['hello-events']
 </script>
 ```
 
@@ -56,7 +53,7 @@ events.on('my_event', (e, ...args) => {
 events.emit('my_event', arg1, arg2)
 ```
 
-## Methods
+## API
 
 ### on(event, callback, priority)
 
@@ -78,6 +75,19 @@ Callback function parameters:
 
 - e: a object which have some information about current event callback, use e.stop() to stop excuting the leftover callbacks.
 - other parameters which passed by `emit`
+
+**event name rules**
+
+Use `.` to concat deep path.
+
+```js
+events.on('root.child', fn) // the events which have name begin with 'root.child' will be fired
+
+events.emit('root', data) // this will not fire fn
+events.emit('root.child.subchild', data) // this will fire fn
+
+events.on('*', fn) // will be fired when any emit occurs
+```
 
 ### once(event, callback, priority)
 
@@ -109,7 +119,9 @@ await events.dispatch('evt').then(() => { // f1, f2, f3 will run one by one
 
 For this code block, f2 will run after f1 resolved, f3 is the same will run after f2 resolved. If f1 rejected, f2 and f3 will not run any more.
 
-### confluer(event, ...args)
+Notice: callback function can be or not be async function.
+
+### release(event, ...args)
 
 The same as `dispatch`. It is used to callback async functions and return a promise:
 
@@ -118,12 +130,14 @@ events.on('evt', async function f1() {})
 events.on('evt', async function f2() {})
 events.on('evt', async function f3() {})
 
-await events.confluer('evt').then(() => { // f1, f2, f3 will run at the same time
+await events.release('evt').then(() => { // f1, f2, f3 will run at the same time
   // ...
 })
 ```
 
 All the callback functions will be run at the same time. Only after all callbacks resolved, the callback in then will run.
+
+Notice: callback function can be or not be async function.
 
 ### destroy()
 
@@ -132,7 +146,7 @@ You should must do this if you use namespace.
 
 ## Passed Arguments
 
-`.confluer` will return a array which contains all results of callbacks.
+`.release` will return a array which contains all results of callbacks.
 
 `.emit` and `.dispatch` will return the value of last callback.
 However, you can get the result of each callback during the pipeline by `e.passed_args`.

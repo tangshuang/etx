@@ -33,9 +33,23 @@ function makeCodeStack() {
   return stack
 }
 
+const makeEventFilter = (event) => (item) => {
+  let found = item.event.split('.').filter(item => !!item).join('.')
+  if (found === '*') {
+    return true
+  }
+  if (found === event) {
+    return true
+  }
+  if (event.indexOf(found + '.') === 0) {
+    return true
+  }
+  return false
+}
+
 const namespaces = {}
 
-export default class HelloEvents {
+export class HelloEvents {
   constructor(ns) {
     if (ns) {
       this.events = namespaces[ns] = namespaces[ns] || []
@@ -58,7 +72,7 @@ export default class HelloEvents {
     })
   }
   emit(event, ...args) {
-    let items = this.events.filter(item => item.event === event)
+    let items = this.events.filter(makeEventFilter(event))
     sortItemsByPriorityDESC(items)
 
     let isStoped = false
@@ -94,7 +108,7 @@ export default class HelloEvents {
   }
   dispatch(event, ...args) {
     return new Promise((resolve, reject) => {
-      let items = this.events.filter(item => item.event === event)
+      let items = this.events.filter(makeEventFilter(event))
       sortItemsByPriorityDESC(items)
 
       let i = 0
@@ -138,9 +152,9 @@ export default class HelloEvents {
       through(args)
     })
   }
-  confluer(event, ...args) {
+  release(event, ...args) {
     return new Promise((resolve, reject) => {
-      let items = this.events.filter(item => item.event === event)
+      let items = this.events.filter(makeEventFilter(event))
       sortItemsByPriorityDESC(items)
 
       let isStoped = false
@@ -185,3 +199,4 @@ export default class HelloEvents {
     this.events.length = 0
   }
 }
+export default HelloEvents
