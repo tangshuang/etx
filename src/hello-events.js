@@ -154,7 +154,7 @@ export class HelloEvents {
       through(args)
     })
   }
-  release(event, ...args) {
+  broadcast(event, ...args) {
     return new Promise((resolve, reject) => {
       let items = this.events.filter(makeEventFilter(event))
       sortItemsByPriorityDESC(items)

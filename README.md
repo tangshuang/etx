@@ -130,7 +130,7 @@ For this code block, f2 will run after f1 resolved, f3 is the same will run afte
 
 Notice: callback function can be or not be async function.
 
-### release(event, ...args)
+### broadcast(event, ...args)
 
 The same as `dispatch`. It is used to callback async functions and return a promise:
 
@@ -139,7 +139,7 @@ events.on('evt', async function f1() {})
 events.on('evt', async function f2() {})
 events.on('evt', async function f3() {})
 
-await events.release('evt').then(() => { // f1, f2, f3 will run at the same time
+await events.broadcast('evt').then(() => { // f1, f2, f3 will run at the same time
   // ...
 })
 ```
@@ -155,7 +155,7 @@ You should must do this if you use namespace.
 
 ## Passed Arguments
 
-`.release` will return a array which contains all results of callbacks.
+`.broadcast` will return a array which contains all results of callbacks.
 
 `.emit` and `.dispatch` will return the value of last callback.
 However, you can get the result of each callback during the pipeline by `e.passed_args`.
