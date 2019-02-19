@@ -6,7 +6,7 @@ module.exports = {
 		filename: 'hello-events.js',
 		library: 'hello-events',
 		libraryTarget: 'umd',
-		globalObject: 'typeof window !== undefined ? window : typeof global !== undefined ? global : typeof self !== undefined ? self : this',
+		globalObject: `typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this`,
 	},
 	module: {
 		rules: [
