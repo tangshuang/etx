@@ -1,6 +1,6 @@
 {
   "name": "hello-events",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "A JS events manager.",
   "main": "dist/hello-events.js",
   "scripts": {
