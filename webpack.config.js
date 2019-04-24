@@ -1,10 +1,10 @@
 module.exports = {
 	mode: 'none',
-	entry: __dirname + '/src/hello-events.js',
+	entry: __dirname + '/src/etx.js',
 	output: {
 		path: __dirname + '/dist',
-		filename: 'hello-events.js',
-		library: 'hello-events',
+		filename: 'etx.js',
+		library: 'etx',
 		libraryTarget: 'umd',
 		globalObject: `typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this`,
 	},

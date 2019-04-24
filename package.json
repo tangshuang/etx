@@ -1,8 +1,8 @@
 {
-  "name": "hello-events",
-  "version": "5.1.2",
-  "description": "A JS events manager.",
-  "main": "dist/hello-events.js",
+  "name": "etx",
+  "version": "1.0.0",
+  "description": "A JS events schedule center.",
+  "main": "dist/etx.js",
   "scripts": {
     "prepublishOnly": "npm run build",
     "build": "rm -rf dist && mkdir dist && webpack",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tangshuang/hello-events.git"
+    "url": "git+https://github.com/tangshuang/etx.git"
   },
   "author": "tangshuang",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tangshuang/hello-events/issues"
+    "url": "https://github.com/tangshuang/etx/issues"
   },
-  "homepage": "https://github.com/tangshuang/hello-events#readme",
+  "homepage": "https://github.com/tangshuang/etx#readme",
   "devDependencies": {
     "@babel/core": "^7.1.6",
     "@babel/preset-env": "^7.1.6",

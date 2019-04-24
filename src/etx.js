@@ -1,79 +1,32 @@
-function sortItemsByPriorityDESC(items) {
-  items.sort((a, b) => {
-    if (a.priority > b.priority) {
-      return -1
-    }
-    else if (a.priority < b.priority) {
-      return 1
-    }
-    else {
-      return 0
-    }
-  })
-}
+import { makeCodeStack, makeEventFilter, sortItemsByPriorityDESC, convertToAsyncFunction } from './utils.js'
 
-function convertToAsyncFunction(fn) {
-  return (...args) => {
-    try {
-      return Promise.resolve(fn(...args))
-    }
-    catch(e) {
-      return Promise.reject(e);
-    }
+export class Etx {
+  constructor() {
+    this.events = []
   }
-}
 
-function makeCodeStack() {
-  let e = new Error()
-  let stack = e.stack || e.stacktrace
-  let stacks = stack.split('\n')
-  stacks.shift()
-  stacks.shift()
-  stack = stacks.join('\n')
-  return stack
-}
-
-const makeEventFilter = (event) => (item) => {
-  let found = item.event.split('.').filter(item => !!item).join('.')
-  if (found === '*') {
-    return true
-  }
-  if (found === event) {
-    return true
-  }
-  if (event.indexOf(found + '.') === 0) {
-    return true
-  }
-  return false
-}
-
-const namespaces = {}
-
-export class HelloEvents {
-  constructor(ns) {
-    if (ns) {
-      this.events = namespaces[ns] = namespaces[ns] || []
-    }
-    else {
-      this.events = []
-    }
-  }
   on(event, callback, priority = 10) {
     this.events.push({ event, callback, priority })
+    return this
   }
   once(event, callback, priority = 10) {
     this.events.push({ event, callback, priority, once: 1 })
+    return this
   }
+
   off(event, callback) {
-    this.events.forEach((item, i) => {
+    let events = this.events.filter(makeEventFilter(event))
+    events.forEach((item, i) => {
       if (item.event === event && (callback === undefined || item.callback === callback)) {
         this.events.splice(i, 1)
       }
     })
+    return this
   }
+
   emit(event, ...args) {
-    let items = this.events.filter(makeEventFilter(event))
-    sortItemsByPriorityDESC(items)
+    let events = this.events.filter(makeEventFilter(event))
+    let items = sortItemsByPriorityDESC(events)
 
     let isStoped = false
     let stop = () => {
@@ -107,10 +60,12 @@ export class HelloEvents {
 
     return result
   }
+
+  // in series
   dispatch(event, ...args) {
     return new Promise((resolve, reject) => {
-      let items = this.events.filter(makeEventFilter(event))
-      sortItemsByPriorityDESC(items)
+      let events = this.events.filter(makeEventFilter(event))
+      let items = sortItemsByPriorityDESC(events)
 
       let i = 0
       let len = items.length
@@ -154,10 +109,12 @@ export class HelloEvents {
       through(args)
     })
   }
+
+  // in parallel
   broadcast(event, ...args) {
     return new Promise((resolve, reject) => {
-      let items = this.events.filter(makeEventFilter(event))
-      sortItemsByPriorityDESC(items)
+      let events = this.events.filter(makeEventFilter(event))
+      let items = sortItemsByPriorityDESC(events)
 
       let isStoped = false
       let stop = () => {
@@ -195,6 +152,7 @@ export class HelloEvents {
       Promise.all(promises).then(resolve).catch(reject)
     })
   }
+
   destroy() {
     // remove all events from global namespace
     // developers should must do this if they use namespace
@@ -202,4 +160,4 @@ export class HelloEvents {
     this.events.length = 0
   }
 }
-export default HelloEvents
+export default Etx

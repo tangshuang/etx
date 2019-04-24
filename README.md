@@ -1,34 +1,34 @@
-# HelloEvents
+# etx
 
-A JS events manager.
+A JS event schedule center.
 
 ## Install
 
 ```
-npm install --save hello-events
+npm i etx
 ```
 
-## Usage
+## Import
 
 ES6:
 
 ```js
-import HelloEvents from 'hello-events'
+import etx from 'etx'
 ```
 
 CommonJS:
 
 ```js
-const { HelloEvents } = require('hello-events')
+const { etx } = require('etx')
 ```
 
 AMD:
 
 ```html
-<script src="./node_modules/hello-events/dist/hello-events.js"></script>
+<script src="./node_modules/etx/dist/etx.js"></script>
 <script>
 define(function(require, exports, module) {
-  const { HelloEvents } = require('hello-events')
+  const { etx } = require('etx')
 })
 </script>
 ```
@@ -36,21 +36,21 @@ define(function(require, exports, module) {
 Normal Browsers:
 
 ```html
-<script src="./node_modules/hello-events/dist/hello-events.js"></script>
+<script src="./node_modules/etx/dist/etx.js"></script>
 <script>
-const { HelloEvents } = window['hello-events']
+const { etx } = window['etx']
 </script>
 ```
 
-To use:
+## Usage
 
 ```js
-const events = new HelloEvents()
-events.on('my_event', (e, ...args) => {
+const etx = new etx()
+etx.on('my_event', (e, ...args) => {
   //...
 })
 //...
-events.emit('my_event', arg1, arg2)
+etx.emit('my_event', arg1, arg2)
 ```
 
 ## API
@@ -62,13 +62,13 @@ events.emit('my_event', arg1, arg2)
 - priority: number, the bigger the earlier, default 10
 
 ```js
-events.on('some_event', (e, name, age) => {
+etx.on('some_event', (e, name, age) => {
   if (name === 'dota') {
     e.stop()
   }
 }, 13)
 
-events.emit('some_event', name, age)
+etx.emit('some_event', name, age)
 ```
 
 Callback function parameters:
@@ -90,12 +90,12 @@ Callback function parameters:
 Use `.` to concat deep path.
 
 ```js
-events.on('root.child', fn) // the events which have name begin with 'root.child' will be fired
+etx.on('root.child', fn) // the etx which have name begin with 'root.child' will be fired
 
-events.emit('root', data) // this will not fire fn
-events.emit('root.child.subchild', data) // this will fire fn
+etx.emit('root', data) // fn invoked
+etx.emit('root.child.subchild', data) // fn not invoked
 
-events.on('*', fn) // will be fired when any emit occurs
+etx.on('*', fn) // will be fired when any emit occurs
 ```
 
 ### once(event, callback, priority)
@@ -104,9 +104,9 @@ The same as `on`, callback will only run once, after it is executed, it will be 
 
 ### off(event, callback)
 
-If you do not pass callback, all callbacks of this event will be removed.
+If you do not pass callback, all callbacks of this event (containing sub-events) will be removed.
 
-Notice: you should must off events' callbacks when you do not need it!!!
+Notice: you should must off etx' callbacks when you do not need them!!!
 
 ### emit(event, ...args)
 
@@ -117,11 +117,11 @@ Trigger callback functions of this event by passing parameters.
 The same as `emit`. It is used to callback async functions and return a promise:
 
 ```js
-events.on('evt', async function f1() {})
-events.on('evt', async function f2() {})
-events.on('evt', async function f3() {})
+etx.on('evt', async function f1() {})
+etx.on('evt', async function f2() {})
+etx.on('evt', async function f3() {})
 
-await events.dispatch('evt').then(() => { // f1, f2, f3 will run one by one
+await etx.dispatch('evt').then(() => { // f1, f2, f3 will run one by one (in series)
   // ...
 })
 ```
@@ -135,29 +135,28 @@ Notice: callback function can be or not be async function.
 The same as `dispatch`. It is used to callback async functions and return a promise:
 
 ```js
-events.on('evt', async function f1() {})
-events.on('evt', async function f2() {})
-events.on('evt', async function f3() {})
+etx.on('evt', async function f1() {})
+etx.on('evt', async function f2() {})
+etx.on('evt', async function f3() {})
 
-await events.broadcast('evt').then(() => { // f1, f2, f3 will run at the same time
+await etx.broadcast('evt').then(() => { // f1, f2, f3 will run at the same time (in parallel)
   // ...
 })
 ```
 
-All the callback functions will be run at the same time. Only after all callbacks resolved, the callback in then will run.
+All the callback functions will be run at the same time.
+Only after all callbacks resolved, the callback in then will run. If one of callbacks rejected, it not affect others, but the whole process will be rejected finally.
+`.broadcast` will return a array which contains all results of callbacks.
 
 Notice: callback function can be or not be async function.
 
 ### destroy()
 
 Destory the instance.
-You should must do this if you use namespace.
 
 ## Passed Arguments
 
-`.broadcast` will return a array which contains all results of callbacks.
-
-`.emit` and `.dispatch` will return the value of last callback.
+`.emit` and `.dispatch` will return the value of the last callback.
 However, you can get the result of each callback during the pipeline by `e.passed_args`.
 
 ```js
