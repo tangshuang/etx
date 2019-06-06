@@ -42,8 +42,9 @@ export const makeEventFilter = (event) => (item) => {
     return true
   }
 
-  // for example: meet='click.custom' by `on` & event='click' by `emit`
-  if (meet.indexOf(event + '.') === 0) {
+  // on('parent')
+  // emit('parent.child')
+  if (event.indexOf(meet + '.') === 0) {
     return true
   }
 
