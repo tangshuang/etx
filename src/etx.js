@@ -3,6 +3,7 @@ import { makeCodeStack, makeEventFilter, sortItemsByPriorityDESC, convertToAsync
 export class Etx {
   constructor() {
     this.events = []
+    this.isSilent = false
   }
 
   on(event, callback, priority = 10) {
@@ -24,7 +25,17 @@ export class Etx {
     return this
   }
 
+  silent(fn) {
+    this.isSilent = true
+    fn.call(this)
+    this.isSilent = false
+  }
+
   emit(event, ...args) {
+    if (this.isSilent) {
+      return
+    }
+
     let events = this.events.filter(makeEventFilter(event))
     let items = sortItemsByPriorityDESC(events)
 
