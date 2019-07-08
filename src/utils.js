@@ -18,7 +18,7 @@ export const convertToAsyncFunction = (fn) => (...args) => {
   try {
     return Promise.resolve(fn(...args))
   }
-  catch(e) {
+  catch (e) {
     return Promise.reject(e);
   }
 }

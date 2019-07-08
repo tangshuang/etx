@@ -2,45 +2,50 @@ import { makeCodeStack, makeEventFilter, sortItemsByPriorityDESC, convertToAsync
 
 export class Etx {
   constructor() {
-    this.events = []
-    this.isSilent = false
+    this._events = []
+    this._isSilent = false
   }
 
   on(event, callback, priority = 10) {
-    this.events.push({ event, callback, priority })
+    this._events.push({ event, callback, priority })
     return this
   }
   once(event, callback, priority = 10) {
-    this.events.push({ event, callback, priority, once: 1 })
+    this._events.push({ event, callback, priority, once: 1 })
     return this
   }
 
   off(event, callback) {
-    let events = this.events.filter(makeEventFilter(event))
+    const events = this._events.filter(makeEventFilter(event))
     events.forEach((item, i) => {
       if (item.event === event && (callback === undefined || item.callback === callback)) {
-        this.events.splice(i, 1)
+        this._events.splice(i, 1)
       }
     })
     return this
   }
 
+  has(event) {
+    const existing = this._events.find(makeEventFilter(event))
+    return !!existing
+  }
+
   silent(fn) {
-    this.isSilent = true
+    this._isSilent = true
     fn.call(this)
-    this.isSilent = false
+    this._isSilent = false
   }
 
   emit(event, ...args) {
-    if (this.isSilent) {
+    if (this._isSilent) {
       return
     }
 
-    let events = this.events.filter(makeEventFilter(event))
-    let items = sortItemsByPriorityDESC(events)
+    const events = this._events.filter(makeEventFilter(event))
+    const items = sortItemsByPriorityDESC(events)
 
     let isStoped = false
-    let stop = () => {
+    const stop = () => {
       isStoped = true
     }
 
@@ -50,8 +55,8 @@ export class Etx {
         break
       }
 
-      let item = items[i]
-      let e = {
+      const item = items[i]
+      const e = {
         origin: event,
         target: item.event,
         priority: item.priority,
@@ -75,29 +80,29 @@ export class Etx {
   // in series
   dispatch(event, ...args) {
     return new Promise((resolve, reject) => {
-      let events = this.events.filter(makeEventFilter(event))
-      let items = sortItemsByPriorityDESC(events)
+      const events = this._events.filter(makeEventFilter(event))
+      const items = sortItemsByPriorityDESC(events)
 
       let i = 0
-      let len = items.length
+      const len = items.length
       let isStoped = false
-      let stop = () => {
+      const stop = () => {
         isStoped = true
       }
 
-      let through = (params) => {
+      const through = (params) => {
         if (isStoped) {
           reject()
           return
         }
 
-        let item = items[i]
+        const item = items[i]
         if (i === len) {
           resolve(params)
           return
         }
 
-        let e = {
+        const e = {
           origin: event,
           target: item.event,
           priority: item.priority,
@@ -108,7 +113,7 @@ export class Etx {
           passed_args: params,
           stack: makeCodeStack(),
         }
-        let fn = convertToAsyncFunction(item.callback)
+        const fn = convertToAsyncFunction(item.callback)
 
         if (item.once) {
           this.off(item.event, item.callback)
@@ -124,23 +129,23 @@ export class Etx {
   // in parallel
   broadcast(event, ...args) {
     return new Promise((resolve, reject) => {
-      let events = this.events.filter(makeEventFilter(event))
-      let items = sortItemsByPriorityDESC(events)
+      const events = this._events.filter(makeEventFilter(event))
+      const items = sortItemsByPriorityDESC(events)
 
       let isStoped = false
-      let stop = () => {
+      const stop = () => {
         isStoped = true
       }
 
-      let promises = []
+      const promises = []
       for (let i = 0, len = items.length; i < len; i ++) {
         if (isStoped) {
           reject()
           return
         }
 
-        let item = items[i]
-        let e = {
+        const item = items[i]
+        const e = {
           origin: event,
           target: item.event,
           priority: item.priority,
@@ -151,8 +156,8 @@ export class Etx {
           passed_args: args,
           stack: makeCodeStack(),
         }
-        let fn = convertToAsyncFunction(item.callback)
-        let defer = fn(e, ...args)
+        const fn = convertToAsyncFunction(item.callback)
+        const defer = fn(e, ...args)
         promises.push(defer)
 
         if (item.once) {
@@ -168,7 +173,7 @@ export class Etx {
     // remove all events from global namespace
     // developers should must do this if they use namespace
     // or they will face memory stack overflow
-    this.events.length = 0
+    this._events.length = 0
   }
 }
 export default Etx
