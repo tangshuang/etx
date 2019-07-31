@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<script src="../dist/etx.js"></script>
+<script>
+const { Etx } = window.etx
+const etx = new Etx()
+
+const fn = (e, ...args) => {
+  const { target, event } = e
+  console.log(event, '-', target, ...args)
+}
+
+etx.on('*', fn)
+etx.on('parent', fn)
+etx.on('parent.child', fn)
+etx.on('parent.child.subchild', fn)
+etx.once('once', fn)
+
+function emit() {
+  console.log('emit:--------------------')
+  etx.emit('parent.child', { name: 'tomy' })
+}
+
+function broadcast() {
+  console.log('broadcast:--------------------')
+  etx.broadcast('parent.child', { name: 'licy' })
+}
+
+async function dispatch() {
+  console.log('dispatch:--------------------')
+  await etx.dispatch('parent.child', { name: 'tomy' })
+}
+
+async function despatch() {
+  console.log('dispatch:--------------------')
+  await etx.despatch('parent.child', { name: 'tomy' })
+}
+
+function once() {
+  console.log('once:--------------------')
+  etx.emit('once', 'test once')
+}
+</script>
+
+<button onclick="emit()">emit</button>
+<button onclick="broadcast()">broadcast</button>
+<button onclick="dispatch()">dispatch</button>
+<button onclick="despatch()">despatch</button>
+<button onclick="once()">once</button>
