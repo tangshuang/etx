@@ -74,14 +74,15 @@ etx.emit('some_event', name, age)
 Callback function parameters:
 
 - e: a object which have some information about current event
-  - target: event name which passed by `emit`,
-  - event: event name which passed by `on`,
-  - callback: event callback,
-  - priority: event priority,
+  - target: event name which passed by `emit`
+  - event: event name which passed by `on`
+  - callback: event callback
+  - priority: event priority
+  - broadcast: is broadcasting?
   - preventDefault: function, when invoked, the left callbacks of current event will not run
   - stopPropagation: fuction, when invoked, callbacks of children's and parents' will not run, not contains roots' callbacks
   - stopImmediatePropagation: function, preventDefault + stopPropagation, and roots' callbacks will not run
-  - stack: code stack, you can use it for debug,
+  - stack: code stack, you can use it for debug
 - ...args: which passed by `emit`
 
 **event name rules**
@@ -111,20 +112,37 @@ Notice: you should must off etx' callbacks when you do not need them!!!
 
 The same as `on`, callback will only run once, after it is executed, it will be offed.
 
-### emit(event, ...args)
+### emit(broadcast?, event, ...args)
 
 Trigger callback functions of this event by passing arguments.
-Will trigger parents' and roots' callbacks when propagete.
+Will propagete to parents and roots.
 
 `args` will be received by `on` callback function.
 
-### broadcast(event, ...args)
+- broadcast: whether to broadcast to children? default false
+- event: event name
 
-Like emit, and will trigger children's callbacks when propagate (before propagate to parents).
+```js
+etx.on('*', (e, ...args) => {
+  console.log(0)
+})
+etx.on('parent', (e, ...args) => {
+  console.log(1)
+})
+etx.on('parent.child', (e, ...args) => {
+  console.log(2)
+})
+etx.on('parent.child.sub', (e, ...args) => {
+  console.log(3)
+})
 
-### dispatch(event, ...args)
+etx.emit('parent.child', ...args) // 2 1 0
+etx.emit(true, 'parent.child', ...args) // 2 3 1 0 // broadcast to children before propagate to parents
+```
 
-Like `emit`, but use async callback functions and return a promise:
+### dispatch(broadcast?, event, ...args)
+
+Like `emit`, but use *async* callback functions and return a promise:
 
 ```js
 etx.on('evt', async function f1() {})
@@ -140,9 +158,9 @@ For this code block, f2 will run after f1 resolved, f3 is the same will run afte
 
 Notice: callback function can be or not be async function.
 
-### despatch(event, ...args)
+### despatch(broadcast?, event, ...args)
 
-Like `broadcast` and `dispatch`.
+Like `dispatch` but parallel in each level.
 
 ```js
 etx.on('evt', async function f1() {})
@@ -159,6 +177,26 @@ Only after all callbacks resolved, the callback in then will run.
 If one of callbacks rejected, it not affect others, but the whole process will be rejected finally.
 
 Notice: callback function can be or not be async function.
+
+### silent(fn)
+
+Disable trigger callbacks in `fn`.
+
+```js
+etx.silent(() => {
+  etx.emit('some') // will not trigger any callbacks
+})
+```
+
+### secret(fn)
+
+Only trigger self's callbacks in `fn`, never propagate.
+
+```js
+etx.secret(() => {
+  etx.emit('parent.child') // parents and roots will not be triggered
+})
+```
 
 ### destroy()
 

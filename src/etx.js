@@ -2,6 +2,7 @@ export class Etx {
   constructor() {
     this._listeners = []
     this._isSilent = false
+    this._isSecret = false
   }
 
   on(event, callback, priority = 10) {
@@ -66,18 +67,34 @@ export class Etx {
 
   silent(fn) {
     this._isSilent = true
-    fn.call(this)
+    const defer = fn.call(this)
     this._isSilent = false
+    return defer
   }
 
-  emit(event, ...args) {
+  secret(fn) {
+    this._isSecret = true
+    const defer = fn.call(this)
+    this._isSecret = false
+    return defer
+  }
+
+  emit(broadcast, event, ...args) {
     if (this._isSilent) {
       return
     }
 
+    if (typeof broadcast !== 'boolean') {
+      args.unshift(event)
+      event = broadcast
+      broadcast = false
+    }
+
     const events = this._listeners.filter(item => item.event === event)
-    const parents = this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
-    const roots = this._listeners.filter(item => item.event === '*')
+    const isSecret = this._isSecret
+    const parents = isSecret ? [] : this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
+    const children = broadcast && !isSecret ? this._listeners.filter(item => item.event.indexOf(event + '.') === 0) : []
+    const roots = isSecret ? [] : this._listeners.filter(item => item.event === '*')
 
     let isPreventDefault = false
     let isStopPropagation = false
@@ -93,6 +110,7 @@ export class Etx {
         event: item.event,
         priority: item.priority,
         callback: item.callback,
+        broadcast,
         preventDefault,
         stopPropagation,
         stopImmediatePropagation,
@@ -106,6 +124,7 @@ export class Etx {
       item.callback(e, ...args)
     }
 
+    // trigger
     for (let i = 0, len = events.length; i < len; i ++) {
       if (isPreventDefault) {
         break
@@ -119,79 +138,7 @@ export class Etx {
       callback(item)
     }
 
-    for (let i = 0, len = parents.length; i < len; i ++) {
-      if (isStopPropagation) {
-        break
-      }
-
-      if (isStopImmediatePropagation) {
-        break
-      }
-
-      const item = parents[i]
-      callback(item)
-    }
-
-    for (let i = 0, len = roots.length; i < len; i ++) {
-      if (isStopImmediatePropagation) {
-        break
-      }
-
-      const item = roots[i]
-      callback(item)
-    }
-  }
-
-  broadcast(event, ...args) {
-    if (this._isSilent) {
-      return
-    }
-
-    const events = this._listeners.filter(item => item.event === event)
-    const parents = this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
-    const children = this._listeners.filter(item => item.event.indexOf(event + '.') === 0)
-    const roots = this._listeners.filter(item => item.event === '*')
-
-    let isPreventDefault = false
-    let isStopPropagation = false
-    let isStopImmediatePropagation = false
-
-    const preventDefault = () => { isPreventDefault = true }
-    const stopPropagation = () => { isStopPropagation = true }
-    const stopImmediatePropagation = () => { isStopImmediatePropagation = true }
-
-    const callback = (item) => {
-      const e = {
-        target: event,
-        event: item.event,
-        priority: item.priority,
-        callback: item.callback,
-        preventDefault,
-        stopPropagation,
-        stopImmediatePropagation,
-        stack: makeCodeStack(),
-      }
-
-      if (item.once) {
-        this.off(item.event, item.callback)
-      }
-
-      item.callback(e, ...args)
-    }
-
-    for (let i = 0, len = events.length; i < len; i ++) {
-      if (isPreventDefault) {
-        break
-      }
-
-      if (isStopImmediatePropagation) {
-        break
-      }
-
-      const item = events[i]
-      callback(item)
-    }
-
+    // propagate
     const relatives = [...children, ...parents]
     for (let i = 0, len = relatives.length; i < len; i ++) {
       if (isStopPropagation) {
@@ -206,6 +153,7 @@ export class Etx {
       callback(item)
     }
 
+    // touch
     for (let i = 0, len = roots.length; i < len; i ++) {
       if (isStopImmediatePropagation) {
         break
@@ -217,15 +165,23 @@ export class Etx {
   }
 
   // in series
-  dispatch(event, ...args) {
+  dispatch(broadcast, event, ...args) {
     return new Promise((resolve, reject) => {
       if (this._isSilent) {
         return resolve()
       }
 
+      if (typeof broadcast !== 'boolean') {
+        args.unshift(event)
+        event = broadcast
+        broadcast = false
+      }
+
       const events = this._listeners.filter(item => item.event === event)
-      const parents = this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
-      const roots = this._listeners.filter(item => item.event === '*')
+      const isSecret = this._isSecret
+      const parents = isSecret ? [] : this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
+      const children = broadcast && !isSecret ? this._listeners.filter(item => item.event.indexOf(event + '.') === 0) : []
+      const roots = isSecret ? [] : this._listeners.filter(item => item.event === '*')
 
       let isPreventDefault = false
       let isStopPropagation = false
@@ -241,6 +197,7 @@ export class Etx {
           event: item.event,
           priority: item.priority,
           callback: item.callback,
+          broadcast,
           preventDefault,
           stopPropagation,
           stopImmediatePropagation,
@@ -255,7 +212,7 @@ export class Etx {
         return fn(e, ...args)
       }
 
-      const throughEvents = () => new Promise((resolve, reject) => {
+      const trigger = () => new Promise((resolve, reject) => {
         let i = 0
         const len = events.length
 
@@ -283,9 +240,11 @@ export class Etx {
         }
         through()
       })
-      const throughParents = () => new Promise((resolve, reject) => {
+      const propagate = () => new Promise((resolve, reject) => {
         let i = 0
-        const len = parents.length
+
+        const items = [...children, ...parents]
+        const len = items.length
 
         const through = () => {
           if (isStopPropagation) {
@@ -298,7 +257,7 @@ export class Etx {
             return
           }
 
-          const item = parents[i]
+          const item = items[i]
           if (i === len) {
             resolve()
             return
@@ -311,7 +270,7 @@ export class Etx {
         }
         through()
       })
-      const throughRoots = () => new Promise((resolve, reject) => {
+      const touch = () => new Promise((resolve, reject) => {
         let i = 0
         const len = roots.length
 
@@ -335,21 +294,28 @@ export class Etx {
         through()
       })
 
-      throughEvents().then(throughParents).then(throughRoots).then(resolve).catch(reject)
+      trigger().then(propagate).then(touch).then(resolve).catch(reject)
     })
   }
 
   // in parallel
-  despatch(event, ...args) {
+  despatch(broadcast, event, ...args) {
     return new Promise((resolve, reject) => {
       if (this._isSilent) {
         return resolve()
       }
 
+      if (typeof broadcast !== 'boolean') {
+        args.unshift(event)
+        event = broadcast
+        broadcast = false
+      }
+
       const events = this._listeners.filter(item => item.event === event)
-      const parents = this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
-      const roots = this._listeners.filter(item => item.event === '*')
-      const children = this._listeners.filter(item => item.event.indexOf(event + '.') === 0)
+      const isSecret = this._isSecret
+      const parents = isSecret ? [] : this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
+      const children = broadcast && !isSecret ? this._listeners.filter(item => item.event.indexOf(event + '.') === 0) : []
+      const roots = isSecret ? [] : this._listeners.filter(item => item.event === '*')
 
       let isPreventDefault = false
       let isStopPropagation = false
@@ -365,6 +331,7 @@ export class Etx {
           event: item.event,
           priority: item.priority,
           callback: item.callback,
+          broadcast,
           preventDefault,
           stopPropagation,
           stopImmediatePropagation,
@@ -379,7 +346,7 @@ export class Etx {
         return fn(e, ...args)
       }
 
-      const broadcastEvents = () => {
+      const trigger = () => {
         const promises = []
         for (let i = 0, len = events.length; i < len; i ++) {
           if (isPreventDefault) {
@@ -396,7 +363,7 @@ export class Etx {
         }
         return Promise.all(promises)
       }
-      const broadcastPropagation = () => {
+      const propagate = () => {
         const promises = []
         const relatives = [...children, ...parents]
         for (let i = 0, len = relatives.length; i < len; i ++) {
@@ -414,7 +381,7 @@ export class Etx {
         }
         return Promise.all(promises)
       }
-      const broadcastRoots = () => {
+      const touch = () => {
         const promises = []
         for (let i = 0, len = roots.length; i < len; i ++) {
           if (isStopImmediatePropagation) {
@@ -428,7 +395,7 @@ export class Etx {
         return Promise.all(promises)
       }
 
-      broadcastEvents().then(broadcastPropagation).then(broadcastRoots).then(resolve).catch(reject)
+      trigger().then(propagate).then(touch).then(resolve).catch(reject)
     })
   }
 
