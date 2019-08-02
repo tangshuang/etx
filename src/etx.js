@@ -49,12 +49,12 @@ export class Etx {
     return this
   }
 
-  contains(event, callback) {
+  isListening(event, callback) {
     if (Array.isArray(event)) {
       const events = event
       for (let i = 0, len = events.length; i < len; i ++) {
         const event = events[i]
-        if (!this.contains(event, callback)) {
+        if (!this.isListening(event, callback)) {
           return false
         }
       }
