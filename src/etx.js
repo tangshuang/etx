@@ -49,19 +49,19 @@ export class Etx {
     return this
   }
 
-  hasRegistered(event) {
+  contains(event, callback) {
     if (Array.isArray(event)) {
       const events = event
       for (let i = 0, len = events.length; i < len; i ++) {
         const event = events[i]
-        if (!this.hasRegistered(event)) {
+        if (!this.contains(event, callback)) {
           return false
         }
       }
       return true
     }
 
-    const existing = this._listeners.find(item => item.event === event)
+    const existing = this._listeners.find(item => item.event === event && (callback === undefined || item.callback === callback))
     return !!existing
   }
 
