@@ -178,7 +178,7 @@ If one of callbacks rejected, it not affect others, but the whole process will b
 
 Notice: callback function can be or not be async function.
 
-### silent(fn)
+### silent(fn|is)
 
 Disable trigger callbacks in `fn`.
 
@@ -188,7 +188,15 @@ etx.silent(() => {
 })
 ```
 
-### secret(fn)
+Or you can pass a boolean to switch silent mode.
+
+```js
+etx.silent(true)
+etx.emit('some')
+etx.silten(false)
+```
+
+### secret(fn|is)
 
 Only trigger self's callbacks in `fn`, never propagate.
 

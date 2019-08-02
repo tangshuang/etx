@@ -66,6 +66,11 @@ export class Etx {
   }
 
   silent(fn) {
+    if (typeof fn === 'boolean') {
+      this._isSilent = fn
+      return
+    }
+
     this._isSilent = true
     const defer = fn.call(this)
     this._isSilent = false
@@ -73,6 +78,11 @@ export class Etx {
   }
 
   secret(fn) {
+    if (typeof fn === 'boolean') {
+      this._isSecret = fn
+      return
+    }
+
     this._isSecret = true
     const defer = fn.call(this)
     this._isSecret = false
