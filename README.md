@@ -178,7 +178,7 @@ If one of callbacks rejected, it not affect others, but the whole process will b
 
 Notice: callback function can be or not be async function.
 
-### silent(fn|is)
+### silent(func|bool|array)
 
 Disable trigger callbacks in `fn`.
 
@@ -193,8 +193,19 @@ Or you can pass a boolean to switch silent mode.
 ```js
 etx.silent(true)
 etx.emit('some')
-etx.silten(false)
+etx.silent(false)
 ```
+
+Or an array which contains events which want to disable.
+
+```js
+etx.silent(['some', 'one'])
+etx.emit('some')
+etx.emit('one')
+etx.silent(false)
+```
+
+The events in passed array should extract match the emit event names.
 
 ### secret(fn|is)
 

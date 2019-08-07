@@ -66,7 +66,7 @@ export class Etx {
   }
 
   silent(fn) {
-    if (typeof fn === 'boolean') {
+    if (typeof fn === 'boolean' || Array.isArray(fn)) {
       this._isSilent = fn
       return
     }
@@ -90,7 +90,7 @@ export class Etx {
   }
 
   emit(broadcast, event, ...args) {
-    if (this._isSilent) {
+    if (this._isSilent === true) {
       return
     }
 
@@ -98,6 +98,10 @@ export class Etx {
       args.unshift(event)
       event = broadcast
       broadcast = false
+    }
+
+    if (Array.isArray(this._isSilent) && this._isSilent.indexOf(event) > -1) {
+      return
     }
 
     const events = this._listeners.filter(item => item.event === event)
@@ -185,6 +189,10 @@ export class Etx {
         args.unshift(event)
         event = broadcast
         broadcast = false
+      }
+
+      if (Array.isArray(this._isSilent) && this._isSilent.indexOf(event) > -1) {
+        return resolve()
       }
 
       const events = this._listeners.filter(item => item.event === event)
@@ -319,6 +327,10 @@ export class Etx {
         args.unshift(event)
         event = broadcast
         broadcast = false
+      }
+
+      if (Array.isArray(this._isSilent) && this._isSilent.indexOf(event) > -1) {
+        return resolve()
       }
 
       const events = this._listeners.filter(item => item.event === event)

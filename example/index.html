@@ -6,8 +6,8 @@ const { Etx } = window.etx
 const etx = new Etx()
 
 const fn = (e, ...args) => {
-  const { target, event } = e
-  console.log(event, '-', target, ...args)
+  const { target, event, stack } = e
+  console.log(event, '-', target, ...args, stack)
 }
 
 etx.on('*', fn)
@@ -40,6 +40,22 @@ function once() {
   console.log('once:--------------------')
   etx.emit('once', 'test once')
 }
+
+function silent() {
+  etx.silent(() => {
+    etx.emit('parent.child') // will not trigger any callbacks
+  })
+
+  etx.silent(true)
+  etx.emit('parent.child')
+  etx.silent(false)
+
+  etx.silent(['parent.child'])
+  etx.emit('parent.child')
+  etx.silent(false)
+
+  console.log('silent')
+}
 </script>
 
 <button onclick="emit()">emit</button>
@@ -47,3 +63,4 @@ function once() {
 <button onclick="dispatch()">dispatch</button>
 <button onclick="despatch()">despatch</button>
 <button onclick="once()">once</button>
+<button onclick="silent()">silent</button>
