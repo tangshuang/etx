@@ -49,12 +49,12 @@ export class Etx {
     return this
   }
 
-  isListening(event, callback) {
+  contain(event, callback) {
     if (Array.isArray(event)) {
       const events = event
       for (let i = 0, len = events.length; i < len; i ++) {
         const event = events[i]
-        if (!this.isListening(event, callback)) {
+        if (!this.contain(event, callback)) {
           return false
         }
       }
@@ -317,7 +317,7 @@ export class Etx {
   }
 
   // in parallel
-  despatch(broadcast, event, ...args) {
+  distribute(broadcast, event, ...args) {
     return new Promise((resolve, reject) => {
       if (this._isSilent) {
         return resolve()

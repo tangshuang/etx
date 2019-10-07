@@ -55,7 +55,7 @@ etx.emit('my_event', arg1, arg2)
 
 ## API
 
-### on(event, callback, priority)
+### on(event, callback, priority?)
 
 - event: string, event name
 - callback: function, should be bound function if needed
@@ -102,15 +102,25 @@ Use `*` to stand for root binding. All emits will trigger the callback of `*`, u
 etx.on('*', fn)
 ```
 
-### off(event, callback)
+### off(event, callback?)
 
 If you do not pass callback, all callbacks of this event will be removed.
 
 Notice: you should must off etx' callbacks when you do not need them!!!
 
-### once(event, callback, priority)
+### once(event, callback, priority?)
 
 The same as `on`, callback will only run once, after it is executed, it will be offed.
+
+### contain(event, callback?)
+
+Whether a event and callback is registered into the Etx instance.
+
+```js
+if (etx.contain('parent', callback)) {
+  // ...
+}
+```
 
 ### emit(broadcast?, event, ...args)
 
@@ -158,7 +168,7 @@ For this code block, f2 will run after f1 resolved, f3 is the same will run afte
 
 Notice: callback function can be or not be async function.
 
-### despatch(broadcast?, event, ...args)
+### distribute(broadcast?, event, ...args)
 
 Like `dispatch` but parallel in each level.
 
@@ -167,7 +177,7 @@ etx.on('evt', async function f1() {})
 etx.on('evt', async function f2() {})
 etx.on('evt', async function f3() {})
 
-await etx.despatch('evt').then(() => { // f1, f2, f3 will run at the same time (in parallel)
+await etx.distribute('evt').then(() => { // f1, f2, f3 will run at the same time (in parallel)
   // ...
 })
 ```
