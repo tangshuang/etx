@@ -1,4 +1,4 @@
-module.exports = {
+const basic = {
 	mode: 'none',
 	entry: __dirname + '/src/etx.js',
 	output: {
@@ -23,3 +23,21 @@ module.exports = {
 	},
 	devtool: 'source-map',
 }
+
+const min = {
+	...basic,
+	mode: 'production',
+	output: {
+		...basic.output,
+		filename: 'etx.min.js',
+	},
+	optimization: {
+		...basic.optimization,
+		minimize: true,
+	},
+}
+
+module.exports = [
+	basic,
+	min,
+]

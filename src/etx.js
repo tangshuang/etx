@@ -1,8 +1,10 @@
+import { toAsync, makeCodeStack, sort } from './utils.js'
+
 export class Etx {
   constructor() {
     this._listeners = []
     this._isSilent = false
-    this._isSecret = false
+    this._isScoped = false
   }
 
   on(event, callback, priority = 10) {
@@ -77,15 +79,15 @@ export class Etx {
     return defer
   }
 
-  secret(fn) {
+  scope(fn) {
     if (typeof fn === 'boolean') {
-      this._isSecret = fn
+      this._isScoped = fn
       return
     }
 
-    this._isSecret = true
+    this._isScoped = true
     const defer = fn.call(this)
-    this._isSecret = false
+    this._isScoped = false
     return defer
   }
 
@@ -105,7 +107,7 @@ export class Etx {
     }
 
     const events = this._listeners.filter(item => item.event === event)
-    const isSecret = this._isSecret
+    const isSecret = this._isScoped
     const parents = isSecret ? [] : this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
     const children = broadcast && !isSecret ? this._listeners.filter(item => item.event.indexOf(event + '.') === 0) : []
     const roots = isSecret ? [] : this._listeners.filter(item => item.event === '*')
@@ -196,7 +198,7 @@ export class Etx {
       }
 
       const events = this._listeners.filter(item => item.event === event)
-      const isSecret = this._isSecret
+      const isSecret = this._isScoped
       const parents = isSecret ? [] : this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
       const children = broadcast && !isSecret ? this._listeners.filter(item => item.event.indexOf(event + '.') === 0) : []
       const roots = isSecret ? [] : this._listeners.filter(item => item.event === '*')
@@ -334,7 +336,7 @@ export class Etx {
       }
 
       const events = this._listeners.filter(item => item.event === event)
-      const isSecret = this._isSecret
+      const isSecret = this._isScoped
       const parents = isSecret ? [] : this._listeners.filter(item => event.indexOf(item.event + '.') === 0)
       const children = broadcast && !isSecret ? this._listeners.filter(item => item.event.indexOf(event + '.') === 0) : []
       const roots = isSecret ? [] : this._listeners.filter(item => item.event === '*')
@@ -430,40 +432,3 @@ export class Etx {
 }
 
 export default Etx
-
-//// utils ////
-
-function sort(items) {
-  items.sort((a, b) => {
-    if (a.priority > b.priority) {
-      return -1
-    }
-    else if (a.priority < b.priority) {
-      return 1
-    }
-    else {
-      return 0
-    }
-  })
-}
-
-function makeCodeStack() {
-  const e = new Error()
-  const stack = e.stack || e.stacktrace
-  const stacks = stack.split('\n')
-  stacks.shift()
-  stacks.shift()
-  const text = stacks.join('\n')
-  return text
-}
-
-function toAsync(fn) {
-  return  (...args) => {
-    try {
-      return Promise.resolve(fn(...args))
-    }
-    catch (e) {
-      return Promise.reject(e)
-    }
-  }
-}

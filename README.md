@@ -1,6 +1,6 @@
-# etx
+# ETX
 
-A JS event controller center.
+A js super Event Trigger manager.
 
 ## Install
 
@@ -188,7 +188,7 @@ If one of callbacks rejected, it not affect others, but the whole process will b
 
 Notice: callback function can be or not be async function.
 
-### silent(func|bool|array)
+### silent(fn|bool|array)
 
 Disable trigger callbacks in `fn`.
 
@@ -217,7 +217,7 @@ etx.silent(false)
 
 The events in passed array should extract match the emit event names.
 
-### secret(fn|is)
+### scope(fn|is)
 
 Only trigger self's callbacks in `fn`, never propagate.
 
