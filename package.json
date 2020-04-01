@@ -5,8 +5,8 @@
   "main": "dist/etx.js",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "build": "rm -rf dist && mkdir dist && webpack",
-    "watch": "npm run build -- --watch"
+    "build": "node gulpfile.js && webpack",
+    "docs": "jsdoc -c ./jsdoc.json"
   },
   "repository": {
     "type": "git",
@@ -22,8 +22,12 @@
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
     "babel-loader": "^8.1.0",
+    "clean-jsdoc-theme": "^2.2.11",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "jsdoc": "^3.6.3",
     "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
-  },
-  "dependencies": {}
+    "webpack-cli": "^3.3.11",
+    "webpack-deep-scope-plugin": "^1.6.2"
+  }
 }

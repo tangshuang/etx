@@ -1,2 +1,7 @@
+node_modules/
+examples/
 .babelrc
 webpack.config.js
+docs/
+jsdoc.json
+.github/

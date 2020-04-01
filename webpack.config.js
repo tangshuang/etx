@@ -1,6 +1,6 @@
 const basic = {
 	mode: 'none',
-	entry: __dirname + '/src/etx.js',
+	entry: __dirname + '/es/etx.js',
 	output: {
 		path: __dirname + '/dist',
 		filename: 'etx.js',
