@@ -203,7 +203,7 @@ await etx.distribute('evt').then(() => { // f1, f2, f3 will run at the same time
 Only after all callbacks resolved, the callback in then will run.
 If one of callbacks rejected, it not affect others, but the whole process will be rejected finally.</p>
 <p>Notice: callback function can be or not be async function.</p>
-<h3>silent(fn|bool|array)</h3>
+<h3>silent(func|bool|array)</h3>
 <p>Disable trigger callbacks in <code>fn</code>.</p>
 <pre class="prettyprint source lang-js"><code>etx.silent(() => {
   etx.emit('some') // will not trigger any callbacks
@@ -221,9 +221,9 @@ etx.emit('one')
 etx.silent(false)
 </code></pre>
 <p>The events in passed array should extract match the emit event names.</p>
-<h3>scope(fn|is)</h3>
+<h3>scope(func|bool)</h3>
 <p>Only trigger self's callbacks in <code>fn</code>, never propagate.</p>
-<pre class="prettyprint source lang-js"><code>etx.secret(() => {
+<pre class="prettyprint source lang-js"><code>etx.scope(() => {
   etx.emit('parent.child') // parents and roots will not be triggered
 })
 </code></pre>
