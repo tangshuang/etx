@@ -188,7 +188,7 @@ If one of callbacks rejected, it not affect others, but the whole process will b
 
 Notice: callback function can be or not be async function.
 
-### silent(fn|bool|array)
+### silent(func|bool|array)
 
 Disable trigger callbacks in `fn`.
 
@@ -217,12 +217,12 @@ etx.silent(false)
 
 The events in passed array should extract match the emit event names.
 
-### scope(fn|is)
+### scope(func|bool)
 
 Only trigger self's callbacks in `fn`, never propagate.
 
 ```js
-etx.secret(() => {
+etx.scope(() => {
   etx.emit('parent.child') // parents and roots will not be triggered
 })
 ```
